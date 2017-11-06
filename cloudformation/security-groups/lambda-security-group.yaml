@@ -1,0 +1,36 @@
+Description: 'Lambda security group'
+
+Parameters:
+
+  EnvironmentName:
+    Description: An environment name that will be prefixed to resource names
+    Type: String
+
+  ParentVPCStack:
+    Description: Optional vpc stack name
+    Type: String
+
+Conditions:
+  HasS3ObjectVersion: !Not [!Equals [!Ref S3ObjectVersion, '']]
+  HasParentVPCStack: !Not [!Equals [!Ref ParentVPCStack, '']]
+
+Resources:
+
+  ValkLambdaSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupName: !Sub ${EnvironmentName}-valk-lambda-security-group
+      GroupDescription: "Lambda security group"
+      VpcId:
+        'Fn::ImportValue': !Sub '${ParentVPCStack}-VPC'
+
+Outputs:
+  StackName:
+    Description: 'Stack name'
+    Value: !Sub '${AWS::StackName}'
+
+  LambdaSecurityGroup:
+    Description: 'Lambda security group'
+    Value: !Ref LambdaSecurityGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-LambdaSecurityGroup'
