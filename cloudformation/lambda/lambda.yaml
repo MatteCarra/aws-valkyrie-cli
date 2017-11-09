@@ -86,6 +86,15 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: !Join ['',['arn:aws:logs:', !Ref "AWS::Region", ':', !Ref "AWS::AccountId", ':log-group:/aws/lambda/', ${EnvironmentName}, ':*']]
+              - Fn::If:
+                - HasVpcStackName
+                - Effect: Allow
+                  Action:
+                    - ec2:DescribeSecurityGroups
+                    - ec2:DescribeSubnets
+                    - ec2:DescribeVpcs
+                  Resource: '*'
+                - !Ref "AWS::NoValue"
 
   ValkLambda:
     Type: "AWS::Lambda::Function"
@@ -103,7 +112,7 @@ Resources:
       Runtime: !Ref Runtime
       Timeout: !Ref Timeout
       VPCConfig:
-        - Fn::If:
+        Fn::If:
           - HasVpcStackName
           - SubnetIds: 'Fn::ImportValue': !Sub '${ParentVPCStack}-SubnetsPrivate'
             SecurityGroupIds:
